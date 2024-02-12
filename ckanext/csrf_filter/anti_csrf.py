@@ -93,8 +93,8 @@ def configure(config):
     else:
         raise ValueError("No secret key provided for CSRF tokens; populate one of %s",
                          key_fields)
-    token_expiry_age = 60 * config.get('ckanext.csrf_filter.token_expiry_minutes', 30)
-    token_renewal_age = 60 * config.get('ckanext.csrf_filter.token_renewal_minutes', 10)
+    token_expiry_age = 60 * int(config.get('ckanext.csrf_filter.token_expiry_minutes', 30))
+    token_renewal_age = 60 * int(config.get('ckanext.csrf_filter.token_renewal_minutes', 10))
 
     exempt_rules = config.get('ckanext.csrf_filter.exempt_rules', None)
     if exempt_rules is not None:
