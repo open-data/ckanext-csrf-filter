@@ -90,7 +90,13 @@ class CSRFFilterPlugin(plugins.SingletonPlugin):
             """ Abort invalid Flask requests based on CSRF token.
             """
             if not anti_csrf.check_csrf():
-                return toolkit.abort(403, "Your form submission could not be validated")
+                # (canada fork only): flash error
+                if not toolkit.request:
+                    return toolkit.abort(403, toolkit._("Your form submission could not be validated, please re-submit the form."))
+                toolkit.h.flash_error(toolkit._("Your form submission could not be validated, please re-submit the form."))
+                if hasattr(toolkit.request, 'view_args'):
+                    return toolkit.h.redirect_to(toolkit.request.endpoint, **toolkit.request.view_args)
+                return toolkit.h.redirect_to(toolkit.request.endpoint)
 
         @blueprint.after_app_request
         def set_csrf_token(response):
