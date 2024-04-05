@@ -91,12 +91,11 @@ class CSRFFilterPlugin(plugins.SingletonPlugin):
             """
             if not anti_csrf.check_csrf():
                 # (canada fork only): flash error
-                if not toolkit.request:
-                    return toolkit.abort(403, toolkit._("Your form submission could not be validated, please re-submit the form."))
-                toolkit.h.flash_error(toolkit._("Your form submission could not be validated, please re-submit the form."))
-                if hasattr(toolkit.request, 'view_args'):
-                    return toolkit.h.redirect_to(toolkit.request.endpoint, **toolkit.request.view_args)
-                return toolkit.h.redirect_to(toolkit.request.endpoint)
+                if hasattr(toolkit.request, 'environ') and 'HTTP_REFERER' in toolkit.request.environ:
+                    # need to use HTTP_REFERER because POSTS may not always post to themselves (toolkit.request.endpoint)
+                    toolkit.h.flash_error(toolkit._("Your form submission could not be validated, please re-submit the form."))
+                    return toolkit.h.redirect_to(toolkit.request.environ['HTTP_REFERER'])
+                return toolkit.abort(403, toolkit._("Your form submission could not be validated, please re-submit the form."))
 
         @blueprint.after_app_request
         def set_csrf_token(response):
